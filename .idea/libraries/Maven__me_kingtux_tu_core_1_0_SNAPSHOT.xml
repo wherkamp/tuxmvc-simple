@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: me.kingtux:tu-core:1.0-SNAPSHOT">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/me/kingtux/tu-core/1.0-SNAPSHOT/tu-core-1.0-20190119.050448-7.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/me/kingtux/tu-core/1.0-SNAPSHOT/tu-core-1.0-20190119.050448-7-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/me/kingtux/tu-core/1.0-SNAPSHOT/tu-core-1.0-20190119.050448-7-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
