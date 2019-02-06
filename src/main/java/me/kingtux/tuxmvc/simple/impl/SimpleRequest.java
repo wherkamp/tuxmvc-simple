@@ -1,6 +1,7 @@
 package me.kingtux.tuxmvc.simple.impl;
 
 import io.javalin.Context;
+import me.kingtux.tmvc.core.request.HTTPCode;
 import me.kingtux.tmvc.core.request.Request;
 import me.kingtux.tmvc.core.request.RequestType;
 import me.kingtux.tmvc.core.request.UploadedFile;
@@ -91,8 +92,30 @@ public class SimpleRequest implements Request {
     }
 
     @Override
+    public int status() {
+        return context.status();
+    }
+
+    @Override
+    public void status(int i) {
+        context.status(i);
+    }
+
+    @Override
+    public void status(HTTPCode httpCode) {
+        status(httpCode.getCode());
+    }
+
+    @Override
     public Map<String, String> header() {
         return context.headerMap();
+    }
+
+    @Override
+    public void redirect(String s, int i) {
+        if (responded) return;
+        responded = true;
+        context.redirect(s, i);
     }
 
     @Override

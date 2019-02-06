@@ -4,7 +4,7 @@ import me.kingtux.tmvc.core.view.View;
 import org.jtwig.JtwigModel;
 
 public class SimpleView implements View {
-    private String template;
+    private String template="";
     private JtwigModel jTwigModel = new JtwigModel();
 
     public JtwigModel getjTwigModel() {

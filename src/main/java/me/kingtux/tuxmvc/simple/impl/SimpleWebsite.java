@@ -19,9 +19,10 @@ public class SimpleWebsite implements Website {
     private Javalin javalin;
     private ViewManager viewManager;
     private DatabaseController databaseController;
+    private boolean https = false;
 
-    public SimpleWebsite(TemplateGrabber templateGrabber, Javalin javalin) {
-
+    public SimpleWebsite(TemplateGrabber templateGrabber, Javalin javalin, boolean https) {
+        this.https = https;
         viewManager = new SimpleViewManager(templateGrabber);
         this.javalin = javalin;
     }
@@ -53,6 +54,11 @@ public class SimpleWebsite implements Website {
 
     public DatabaseController getDatabaseController() {
         return null;
+    }
+
+    @Override
+    public boolean isHttps() {
+        return https;
     }
 
 }

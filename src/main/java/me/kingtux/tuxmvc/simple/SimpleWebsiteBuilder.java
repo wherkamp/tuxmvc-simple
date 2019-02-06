@@ -4,50 +4,82 @@ import io.javalin.Javalin;
 import io.javalin.staticfiles.Location;
 import me.kingtux.tmvc.core.Website;
 import me.kingtux.tmvc.core.view.TemplateGrabber;
+import me.kingtux.tmvc.core.view.templategrabbers.ExternalTemplateGrabber;
 import me.kingtux.tuxmvc.simple.impl.SimpleWebsite;
+import org.eclipse.jetty.server.Connector;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.ServerConnector;
+import org.eclipse.jetty.util.ssl.SslContextFactory;
 
 import java.io.File;
 
 public class SimpleWebsiteBuilder {
-    private Javalin javalin;
-    //private String url, username, password;
+    //Template Grabber
     private TemplateGrabber templateGrabber;
+    //Javalin Stuff
+    private SslContextFactory sslContextFactory;
+    private int port = 7575, sslPort;
+    private File publicDirectory = new File("public");
 
+    //End of Javalin stuff
     private SimpleWebsiteBuilder() {
-
     }
 
-    public static SimpleWebsiteBuilder createSimpleBuilder(Javalin jav) {
-        SimpleWebsiteBuilder s = new SimpleWebsiteBuilder();
-        s.javalin = jav.start();
-        return s;
-    }
-
-    public static SimpleWebsiteBuilder createSimpleBuilder(int port, File publicFolder) {
-        return createSimpleBuilder(Javalin.create().port(port).enableStaticFiles(publicFolder.getPath(), Location.EXTERNAL));
-    }
-
-    public static SimpleWebsiteBuilder createSimpleBuilder(int port) {
-        return createSimpleBuilder(port, new File("public"));
-    }
-
-    public static SimpleWebsiteBuilder createSimpleBuilder() {
-        return createSimpleBuilder(7000);
-    }
-
-    public SimpleWebsiteBuilder templateGrabber(TemplateGrabber templateGrabber) {
-        this.templateGrabber = templateGrabber;
+    public SimpleWebsiteBuilder port(int port) {
+        this.port = port;
         return this;
     }
-    /*public SimpleWebsiteBuilder sql(SQLDialects dialects, String username, String password, String host, String database, String port) {
-        this.dialects = dialects;
-        this.url = String.format(this.dialects.getUrl(), host, port, database);
-        this.username = username;
-        this.password = password;
+
+    public SimpleWebsiteBuilder templateGrabber(TemplateGrabber t) {
+        this.templateGrabber = t;
         return this;
-    }*/
+    }
+
+    public SimpleWebsiteBuilder defaultTemplateGrabber() {
+        this.templateGrabber = new ExternalTemplateGrabber(new File("templates"));
+        return this;
+    }
+
+    public static SimpleWebsiteBuilder create() {
+        return new SimpleWebsiteBuilder();
+    }
+
+    public static SslContextFactory getSslContextFactory(String file, String password) {
+        SslContextFactory sslContextFactory = new SslContextFactory();
+        sslContextFactory.setKeyStorePath(file);
+        sslContextFactory.setKeyStorePassword(password);
+        return sslContextFactory;
+    }
+
+    public SimpleWebsiteBuilder ssl(int sslPort, SslContextFactory sslContextFactory) {
+        this.sslPort = sslPort;
+        this.sslContextFactory = sslContextFactory;
+        return this;
+    }
+
+    public SimpleWebsiteBuilder ssl(int sslPort, String certPath, String password) {
+        this.sslPort = sslPort;
+        this.sslContextFactory = getSslContextFactory(certPath, password);
+        return this;
+    }
 
     public Website build() {
-        return new SimpleWebsite(templateGrabber, javalin);
+        Javalin javalin = Javalin.create().enableStaticFiles(publicDirectory.getPath(), Location.EXTERNAL);
+        if (!publicDirectory.exists()) publicDirectory.mkdir();
+        if (sslContextFactory != null) {
+            javalin.server(() -> {
+                Server server = new Server();
+                ServerConnector sslConnector = new ServerConnector(server, sslContextFactory);
+                sslConnector.setPort(port);
+                ServerConnector connector = new ServerConnector(server);
+                connector.setPort(sslPort);
+                server.setConnectors(new Connector[]{sslConnector, connector});
+                return server;
+            });
+        } else {
+            javalin.port(port);
+        }
+        javalin.start();
+        return new SimpleWebsite(templateGrabber, javalin, sslContextFactory != null);
     }
 }
