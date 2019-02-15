@@ -5,8 +5,13 @@ import io.javalin.Javalin;
 import io.javalin.core.HandlerType;
 import me.kingtux.simpleannotation.MethodFinder;
 import me.kingtux.tmvc.core.Website;
+import me.kingtux.tmvc.core.WebsiteRules;
 import me.kingtux.tmvc.core.annotations.Path;
 import me.kingtux.tmvc.core.controller.SingleController;
+import me.kingtux.tmvc.core.emails.EmailBuilder;
+import me.kingtux.tmvc.core.emails.EmailSettings;
+import me.kingtux.tmvc.core.errorhandler.ErrorController;
+import me.kingtux.tmvc.core.errorhandler.annotations.EHPath;
 import me.kingtux.tmvc.core.model.DatabaseController;
 import me.kingtux.tmvc.core.request.RequestType;
 import me.kingtux.tmvc.core.view.TemplateGrabber;
@@ -20,11 +25,16 @@ public class SimpleWebsite implements Website {
     private ViewManager viewManager;
     private DatabaseController databaseController;
     private boolean https = false;
+    private String cors = "*";
+    private EmailSettings emailSettings;
+    private WebsiteRules websiteRules;
 
-    public SimpleWebsite(TemplateGrabber templateGrabber, Javalin javalin, boolean https) {
+    public SimpleWebsite(TemplateGrabber templateGrabber, Javalin javalin, String host, boolean https) {
         this.https = https;
-        viewManager = new SimpleViewManager(templateGrabber);
         this.javalin = javalin;
+        websiteRules = new SimpleWebsiteRules(https ? "https" : "http", host);
+        viewManager = new SimpleViewManager(templateGrabber, websiteRules);
+
     }
 
     public void registerController(Object controller) {
@@ -32,6 +42,15 @@ public class SimpleWebsite implements Website {
             SingleController sc = new SingleController(controller, method);
             javalin.addHandler(getHandlerType(sc.getRequestType()), sc.getPath(), new ControllerHandler(sc, this    )::execute);
         }
+    }
+
+    @Override
+    public void registerErrorHandler(Object errorHandler) {
+        for (Method method : MethodFinder.getAllMethodsWithAnnotation(errorHandler.getClass(), EHPath.class)) {
+            ErrorController errorController = new ErrorController(errorHandler, method);
+            javalin.error(errorController.status(), new ErrorControllerHandler(errorController, this)::execute);
+        }
+
     }
 
     private HandlerType getHandlerType(RequestType requestType) {
@@ -52,6 +71,21 @@ public class SimpleWebsite implements Website {
         return viewManager;
     }
 
+    @Override
+    public EmailBuilder buildEmailBuilder() {
+        return null;
+    }
+
+    @Override
+    public EmailBuilder buildEmtpyEmailBuilder() {
+        return null;
+    }
+
+    @Override
+    public EmailSettings getEmailSettings() {
+        return emailSettings;
+    }
+
     public DatabaseController getDatabaseController() {
         return null;
     }
@@ -61,4 +95,22 @@ public class SimpleWebsite implements Website {
         return https;
     }
 
+    public void close() {
+        javalin.stop();
+    }
+
+    @Override
+    public WebsiteRules getSiteRules() {
+        return websiteRules;
+    }
+
+    @Override
+    public void setCORS(String s) {
+        this.cors = s;
+    }
+
+    @Override
+    public String getCORS() {
+        return cors;
+    }
 }

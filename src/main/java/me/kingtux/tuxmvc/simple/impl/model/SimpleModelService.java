@@ -1,4 +1,4 @@
-package me.kingtux.tuxmvc.simple.impl;
+package me.kingtux.tuxmvc.simple.impl.model;
 
 import me.kingtux.tmvc.core.model.Model;
 import me.kingtux.tmvc.core.model.ModelService;

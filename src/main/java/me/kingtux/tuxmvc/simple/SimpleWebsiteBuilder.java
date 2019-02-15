@@ -20,21 +20,46 @@ public class SimpleWebsiteBuilder {
     private SslContextFactory sslContextFactory;
     private int port = 7575, sslPort;
     private File publicDirectory = new File("public");
+    private String host;
 
     //End of Javalin stuff
     private SimpleWebsiteBuilder() {
     }
 
+    /**
+     * The port
+     * @param port the port
+     * @return the SimpleWebsiteBuilder
+     */
     public SimpleWebsiteBuilder port(int port) {
         this.port = port;
         return this;
     }
 
+    /**
+     * The host
+     * @param host the host (google.com)
+     * @return the SimpleWebsiteBuilder
+     */
+    public SimpleWebsiteBuilder host(String host) {
+        this.host = host;
+        return this;
+    }
+
+    /**
+     * https://docs.kingtux.me/tuxmvc/index.html?me/kingtux/tmvc/core/view/templategrabbers/package-summary.html
+     * @param t the Template
+     * @return the SimpleWebsiteBuilder
+     */
     public SimpleWebsiteBuilder templateGrabber(TemplateGrabber t) {
         this.templateGrabber = t;
         return this;
     }
 
+    /**
+     * Use the default templategrabber
+     * @return the SimpleWebsiteBuilder
+     */
     public SimpleWebsiteBuilder defaultTemplateGrabber() {
         this.templateGrabber = new ExternalTemplateGrabber(new File("templates"));
         return this;
@@ -51,18 +76,35 @@ public class SimpleWebsiteBuilder {
         return sslContextFactory;
     }
 
+    /**
+     * Sets the ssl rules
+     * @param sslPort the port
+     * @param sslContextFactory the sslContextFactory
+     * @return the SimpleWebsiteBuilder
+     */
     public SimpleWebsiteBuilder ssl(int sslPort, SslContextFactory sslContextFactory) {
         this.sslPort = sslPort;
         this.sslContextFactory = sslContextFactory;
         return this;
     }
 
+    /**
+     * Sets the ssl rules,
+     * @param sslPort the port to use
+     * @param certPath the cert path
+     * @param password the password
+     * @return the SimpleWebsiteBuilder
+     */
     public SimpleWebsiteBuilder ssl(int sslPort, String certPath, String password) {
         this.sslPort = sslPort;
         this.sslContextFactory = getSslContextFactory(certPath, password);
         return this;
     }
 
+    /**
+     * Builds the website!
+     * @return The website!
+     */
     public Website build() {
         Javalin javalin = Javalin.create().enableStaticFiles(publicDirectory.getPath(), Location.EXTERNAL);
         if (!publicDirectory.exists()) publicDirectory.mkdir();
@@ -80,6 +122,6 @@ public class SimpleWebsiteBuilder {
             javalin.port(port);
         }
         javalin.start();
-        return new SimpleWebsite(templateGrabber, javalin, sslContextFactory != null);
+        return new SimpleWebsite(templateGrabber, javalin, host,sslContextFactory != null);
     }
 }

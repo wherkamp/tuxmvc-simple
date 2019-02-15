@@ -1,6 +1,7 @@
 package me.kingtux.tuxmvc.simple.impl;
 
 import io.javalin.Context;
+import me.kingtux.tmvc.core.Website;
 import me.kingtux.tmvc.core.request.HTTPCode;
 import me.kingtux.tmvc.core.request.Request;
 import me.kingtux.tmvc.core.request.RequestType;
@@ -16,12 +17,12 @@ public class SimpleRequest implements Request {
     private RequestType type;
     private boolean responded = false;
     private String mimeType = "text/html";
-
+    private Website website;
     public SimpleRequest(Context context) {
         this.context = context;
     }
 
-    public SimpleRequest(Context context, RequestType requestType) {
+    public SimpleRequest(Context context, RequestType requestType, Website website) {
         this(context);
         type = requestType;
 
@@ -35,6 +36,11 @@ public class SimpleRequest implements Request {
     @Override
     public void responseType(String s) {
         this.mimeType = s;
+    }
+
+    @Override
+    public String queryString() {
+        return context.queryString();
     }
 
     @Override
@@ -59,6 +65,11 @@ public class SimpleRequest implements Request {
         }
 
         return map;
+    }
+
+    @Override
+    public Map<String, String> cookieMap() {
+        return context.cookieMap();
     }
 
     @Override
@@ -150,6 +161,7 @@ public class SimpleRequest implements Request {
 
     @Override
     public void respond(String s) {
+        responded = true;
         context.contentType(mimeType).result(s);
     }
 
@@ -162,5 +174,29 @@ public class SimpleRequest implements Request {
     @Override
     public List<UploadedFile> getUploadedFiles(String s) {
             return context.uploadedFiles(s).stream().map(SimpleUploadedFile::new).collect(Collectors.toList());
+    }
+
+    @Override
+    public void session(String s, Object o) {
+        context.sessionAttribute(s, o);
+    }
+
+    @Override
+    public Map<String, Object> sessionMap() {
+        return context.sessionAttributeMap();
+    }
+
+    @Override
+    public Website getWebsite() {
+        return website;
+    }
+
+    public void endSession() {
+        context.req.getSession().invalidate();
+    }
+
+    @Override
+    public void setResponseHeader(String s, String s1) {
+        context.res.setHeader(s, s1);
     }
 }

@@ -5,6 +5,9 @@
       <item index="0" class="java.lang.String" itemvalue="me.kingtux.tmvc.core.annotations.Path" />
     </list>
   </component>
+  <component name="JavadocGenerationManager">
+    <option name="OUTPUT_DIRECTORY" value="$USER_HOME$/docs/tuxmvc-simple" />
+  </component>
   <component name="MavenProjectsManager">
     <option name="originalFiles">
       <list>

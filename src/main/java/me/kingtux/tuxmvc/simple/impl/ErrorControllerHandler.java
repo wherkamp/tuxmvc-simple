@@ -4,24 +4,24 @@ import io.javalin.Context;
 import me.kingtux.tmvc.core.Website;
 import me.kingtux.tmvc.core.controller.ControllerExeception;
 import me.kingtux.tmvc.core.controller.ControllerExecutor;
-import me.kingtux.tmvc.core.controller.SingleController;
+import me.kingtux.tmvc.core.errorhandler.ErrorController;
 
-public class ControllerHandler {
-    private SingleController sc;
+public class ErrorControllerHandler {
+    private ErrorController sc;
     private Website website;
 
-    public ControllerHandler(SingleController sc) {
+    public ErrorControllerHandler(ErrorController sc) {
         this.sc = sc;
     }
 
-    public ControllerHandler(SingleController sc, Website website) {
+    public ErrorControllerHandler(ErrorController sc, Website website) {
         this.sc = sc;
         this.website = website;
     }
 
     public void execute(Context ctx) {
         try {
-            ControllerExecutor se = sc.buildExecutor(new SimpleRequest(ctx, sc.getRequestType(), website), website.getViewManager(), website);
+            ControllerExecutor se = sc.buildExecutor(new SimpleRequest(ctx, null, website), website.getViewManager(), website);
             se.execute();
         } catch (ControllerExeception controllerExeception) {
             controllerExeception.printStackTrace();
