@@ -17,7 +17,7 @@ public class SimpleWebsiteBuilder {
     //Template Grabber
     private TemplateGrabber templateGrabber;
     //Javalin Stuff
-    private SslContextFactory sslContextFactory;
+    private SslContextFactory sslContextFactory = null;
     private int port = 7575, sslPort;
     private File publicDirectory = new File("public");
     private String host;
@@ -101,6 +101,10 @@ public class SimpleWebsiteBuilder {
         return this;
     }
 
+    public SimpleWebsiteBuilder publicDirectory(File publicDirectory) {
+        this.publicDirectory = publicDirectory;
+        return this;
+    }
     /**
      * Builds the website!
      * @return The website!
@@ -109,16 +113,18 @@ public class SimpleWebsiteBuilder {
         Javalin javalin = Javalin.create().enableStaticFiles(publicDirectory.getPath(), Location.EXTERNAL);
         if (!publicDirectory.exists()) publicDirectory.mkdir();
         if (sslContextFactory != null) {
+            System.out.println("Using SSL Server!");
             javalin.server(() -> {
                 Server server = new Server();
                 ServerConnector sslConnector = new ServerConnector(server, sslContextFactory);
-                sslConnector.setPort(port);
+                sslConnector.setPort(sslPort);
                 ServerConnector connector = new ServerConnector(server);
-                connector.setPort(sslPort);
+                connector.setPort(port);
                 server.setConnectors(new Connector[]{sslConnector, connector});
                 return server;
             });
         } else {
+            System.out.println("Starting Regular Website");
             javalin.port(port);
         }
         javalin.start();

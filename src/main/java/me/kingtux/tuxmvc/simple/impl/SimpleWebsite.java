@@ -33,7 +33,7 @@ public class SimpleWebsite implements Website {
         this.https = https;
         this.javalin = javalin;
         websiteRules = new SimpleWebsiteRules(https ? "https" : "http", host);
-        viewManager = new SimpleViewManager(templateGrabber, websiteRules);
+        viewManager = new SimpleViewManager(templateGrabber, this);
 
     }
 
@@ -50,7 +50,6 @@ public class SimpleWebsite implements Website {
             ErrorController errorController = new ErrorController(errorHandler, method);
             javalin.error(errorController.status(), new ErrorControllerHandler(errorController, this)::execute);
         }
-
     }
 
     private HandlerType getHandlerType(RequestType requestType) {

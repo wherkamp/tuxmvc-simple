@@ -7,6 +7,7 @@ import me.kingtux.tmvc.core.request.Request;
 import me.kingtux.tmvc.core.request.RequestType;
 import me.kingtux.tmvc.core.request.UploadedFile;
 
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -161,8 +162,21 @@ public class SimpleRequest implements Request {
 
     @Override
     public void respond(String s) {
+        if(s==null){
+            status(500);
+            return;
+        }
         responded = true;
         context.contentType(mimeType).result(s);
+    }
+
+    @Override
+    public void respond(InputStream inputStream) {
+        if(inputStream==null){
+            status(500);
+            return;
+        }
+        context.result(inputStream);
     }
 
 
